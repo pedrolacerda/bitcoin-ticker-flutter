@@ -49,11 +49,7 @@ class _PriceScreenState extends State<PriceScreen> {
   }
 
   Widget getPicker() {
-    if (Platform.isIOS) {
-      return iIOSPicker();
-    } else if (Platform.isAndroid) {
-      return androidDropDown();
-    }
+    return Platform.isIOS ? iIOSPicker() : androidDropDown();
   }
 
   @override
