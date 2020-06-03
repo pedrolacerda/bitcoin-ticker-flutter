@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'constants.dart';
+import 'package:http/http.dart' as http;
+
 const List<String> currenciesList = [
   'AUD',
   'BRL',
@@ -28,4 +32,22 @@ const List<String> cryptoList = [
   'LTC',
 ];
 
-class CoinData {}
+class CoinData {
+  var price;
+
+  Future getCoinData(String coinId) async {
+    http.Response response =
+        await http.get('$kApiURl/currencies/ticker?key=$kApiKey&ids=$coinId');
+
+    if (response.statusCode == 200) {
+      var data = jsonDecode(response.body);
+      price = double.parse(data[0]['price']);
+
+      return price;
+    } else {
+      print(response.statusCode);
+
+      throw 'Problem with the get request';
+    }
+  }
+}
