@@ -35,9 +35,9 @@ const List<String> cryptoList = [
 class CoinData {
   var price;
 
-  Future getCoinData(String coinId) async {
-    http.Response response =
-        await http.get('$kApiURl/currencies/ticker?key=$kApiKey&ids=$coinId');
+  Future getCoinData(String coinId, String currencyId) async {
+    http.Response response = await http.get(
+        '$kApiURl/currencies/ticker?key=$kApiKey&ids=$coinId&convert=$currencyId');
 
     if (response.statusCode == 200) {
       var data = jsonDecode(response.body);

@@ -9,6 +9,7 @@ class PriceScreen extends StatefulWidget {
 }
 
 class _PriceScreenState extends State<PriceScreen> {
+  String selectedCoin = 'LTC';
   String selectedCurrency = 'USD';
   String coinValueInCurrency = '?';
 
@@ -21,11 +22,12 @@ class _PriceScreenState extends State<PriceScreen> {
 
   void getData() async {
     try {
-      double data = await CoinData().getCoinData('BTC');
+      double data =
+          await CoinData().getCoinData(selectedCoin, selectedCurrency);
+
       setState(() {
         coinValueInCurrency = data.toStringAsFixed(2);
       });
-      print('initState() price: $coinValueInCurrency');
     } catch (e) {
       print(e);
     }
@@ -49,6 +51,32 @@ class _PriceScreenState extends State<PriceScreen> {
       onChanged: (value) {
         setState(() {
           selectedCurrency = value;
+          getData();
+        });
+      },
+    );
+  }
+
+  DropdownButton<String> androidDropDownCoins() {
+    List<DropdownMenuItem<String>> dropDownItems = [];
+
+    for (String coin in cryptoList) {
+      print(coin);
+
+      var newItem = DropdownMenuItem(
+        child: Text(coin),
+        value: coin,
+      );
+      dropDownItems.add(newItem);
+    }
+
+    return DropdownButton<String>(
+      value: selectedCurrency,
+      items: dropDownItems,
+      onChanged: (value) {
+        setState(() {
+          selectedCoin = value;
+          getData();
         });
       },
     );
@@ -57,19 +85,44 @@ class _PriceScreenState extends State<PriceScreen> {
   CupertinoPicker iIOSPicker() {
     List<Text> pickerItems = [];
 
+    for (String coin in cryptoList) {
+      pickerItems.add(Text(coin));
+    }
+    return CupertinoPicker(
+      backgroundColor: Colors.lightBlue,
+      itemExtent: 32.0,
+      onSelectedItemChanged: (selectedIndex) {
+        selectedCoin = cryptoList[selectedIndex];
+        getData();
+      },
+      children: pickerItems,
+    );
+  }
+
+  CupertinoPicker iIOSPickerCoins() {
+    List<Text> pickerItems = [];
+
     for (String currency in currenciesList) {
       pickerItems.add(Text(currency));
     }
     return CupertinoPicker(
       backgroundColor: Colors.lightBlue,
       itemExtent: 32.0,
-      onSelectedItemChanged: (selectedIndex) {},
+      onSelectedItemChanged: (selectedIndex) {
+        selectedCurrency = currenciesList[selectedIndex];
+        print('selectedCurrency: $selectedCurrency');
+        getData();
+      },
       children: pickerItems,
     );
   }
 
   Widget getPicker() {
     return Platform.isIOS ? iIOSPicker() : androidDropDown();
+  }
+
+  Widget getCoinPicker() {
+    return Platform.isIOS ? iIOSPickerCoins() : androidDropDownCoins();
   }
 
   @override
@@ -93,7 +146,7 @@ class _PriceScreenState extends State<PriceScreen> {
               child: Padding(
                 padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
                 child: Text(
-                  '1 BTC = $coinValueInCurrency USD',
+                  '1 $selectedCoin = $coinValueInCurrency $selectedCurrency',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 20.0,
@@ -102,6 +155,13 @@ class _PriceScreenState extends State<PriceScreen> {
                 ),
               ),
             ),
+          ),
+          Container(
+            height: 150.0,
+            alignment: Alignment.center,
+            padding: EdgeInsets.only(bottom: 30.0),
+            color: Colors.lightBlue,
+            child: getCoinPicker(),
           ),
           Container(
             height: 150.0,
