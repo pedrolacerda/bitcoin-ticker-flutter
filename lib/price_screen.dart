@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'coin_data.dart';
 import 'package:flutter/cupertino.dart';
 import 'dart:io' show Platform;
+import 'currency_card.dart';
 
 class PriceScreen extends StatefulWidget {
   @override
@@ -9,9 +10,10 @@ class PriceScreen extends StatefulWidget {
 }
 
 class _PriceScreenState extends State<PriceScreen> {
-  String selectedCoin = 'LTC';
-  String selectedCurrency = 'USD';
-  String coinValueInCurrency = '?';
+  String selectedCurrency = 'AUD';
+  String btcValueInCurrency = '?';
+  String ethValueInCurrency = '?';
+  String ltcValueInCurrency = '?';
 
   @override
   void initState() {
@@ -22,11 +24,14 @@ class _PriceScreenState extends State<PriceScreen> {
 
   void getData() async {
     try {
-      double data =
-          await CoinData().getCoinData(selectedCoin, selectedCurrency);
+      double dataBTC = await CoinData().getCoinData('BTC', selectedCurrency);
+      double dataETH = await CoinData().getCoinData('ETH', selectedCurrency);
+      double dataLTC = await CoinData().getCoinData('LTC', selectedCurrency);
 
       setState(() {
-        coinValueInCurrency = data.toStringAsFixed(2);
+        btcValueInCurrency = dataBTC.toStringAsFixed(2);
+        ethValueInCurrency = dataETH.toStringAsFixed(2);
+        ltcValueInCurrency = dataLTC.toStringAsFixed(2);
       });
     } catch (e) {
       print(e);
@@ -57,49 +62,7 @@ class _PriceScreenState extends State<PriceScreen> {
     );
   }
 
-  DropdownButton<String> androidDropDownCoins() {
-    List<DropdownMenuItem<String>> dropDownItems = [];
-
-    for (String coin in cryptoList) {
-      print(coin);
-
-      var newItem = DropdownMenuItem(
-        child: Text(coin),
-        value: coin,
-      );
-      dropDownItems.add(newItem);
-    }
-
-    return DropdownButton<String>(
-      value: selectedCurrency,
-      items: dropDownItems,
-      onChanged: (value) {
-        setState(() {
-          selectedCoin = value;
-          getData();
-        });
-      },
-    );
-  }
-
   CupertinoPicker iIOSPicker() {
-    List<Text> pickerItems = [];
-
-    for (String coin in cryptoList) {
-      pickerItems.add(Text(coin));
-    }
-    return CupertinoPicker(
-      backgroundColor: Colors.lightBlue,
-      itemExtent: 32.0,
-      onSelectedItemChanged: (selectedIndex) {
-        selectedCoin = cryptoList[selectedIndex];
-        getData();
-      },
-      children: pickerItems,
-    );
-  }
-
-  CupertinoPicker iIOSPickerCoins() {
     List<Text> pickerItems = [];
 
     for (String currency in currenciesList) {
@@ -110,7 +73,6 @@ class _PriceScreenState extends State<PriceScreen> {
       itemExtent: 32.0,
       onSelectedItemChanged: (selectedIndex) {
         selectedCurrency = currenciesList[selectedIndex];
-        print('selectedCurrency: $selectedCurrency');
         getData();
       },
       children: pickerItems,
@@ -121,10 +83,6 @@ class _PriceScreenState extends State<PriceScreen> {
     return Platform.isIOS ? iIOSPicker() : androidDropDown();
   }
 
-  Widget getCoinPicker() {
-    return Platform.isIOS ? iIOSPickerCoins() : androidDropDownCoins();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -133,35 +91,26 @@ class _PriceScreenState extends State<PriceScreen> {
       ),
       body: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
-          Padding(
-            padding: EdgeInsets.fromLTRB(18.0, 18.0, 18.0, 0),
-            child: Card(
-              color: Colors.lightBlueAccent,
-              elevation: 5.0,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10.0),
-              ),
-              child: Padding(
-                padding: EdgeInsets.symmetric(vertical: 15.0, horizontal: 28.0),
-                child: Text(
-                  '1 $selectedCoin = $coinValueInCurrency $selectedCurrency',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 20.0,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ),
-          ),
           Container(
-            height: 150.0,
-            alignment: Alignment.center,
-            padding: EdgeInsets.only(bottom: 30.0),
-            color: Colors.lightBlue,
-            child: getCoinPicker(),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                CurrencyCard(
+                    selectedCoin: 'BTC',
+                    coinValueInCurrency: btcValueInCurrency,
+                    selectedCurrency: selectedCurrency),
+                CurrencyCard(
+                    selectedCoin: 'ETH',
+                    coinValueInCurrency: ethValueInCurrency,
+                    selectedCurrency: selectedCurrency),
+                CurrencyCard(
+                    selectedCoin: 'LTC',
+                    coinValueInCurrency: ltcValueInCurrency,
+                    selectedCurrency: selectedCurrency),
+              ],
+            ),
           ),
           Container(
             height: 150.0,
